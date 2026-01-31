@@ -11,7 +11,7 @@ const finalText = document.getElementById("final-text");
 
 // --- VARIABLES ---
 let hoverCount = 0;
-let cycleCount = 0; // 0 = First try, 1 = Second try, 2 = Third try
+let cycleCount = 0;
 
 // --- 1. ENVELOPE LOGIC ---
 envelope.addEventListener("click", () => {
@@ -22,15 +22,24 @@ envelope.addEventListener("click", () => {
     }, 50);
 });
 
-// --- 2. NO BUTTON: MOUSEOVER (Run Away) ---
-noBtn.addEventListener("mouseover", () => {
-    // If moved 3 times, allow click
+// --- 2. MOVEMENT LOGIC (Shared by Mouse & Touch) ---
+function moveNoButton(e) {
+    // If we've done this 3 times, STOP moving and allow the click
     if (hoverCount >= 3) {
         noBtn.style.cursor = "pointer";
-        return; 
+        return; // Let the event pass through (so it clicks)
     }
-    const min = 200;
-    const max = 200;
+
+    // IMPORTANT: If this is a touch event (mobile), stop the click from happening!
+    if (e.type === "touchstart") {
+        e.preventDefault(); 
+    }
+
+    // SMART LOGIC: Move less on mobile so it stays on screen
+    const isMobile = window.innerWidth <= 600;
+    const min = isMobile ? 50 : 100; // Smaller moves on phone
+    const max = isMobile ? 100 : 200;
+
     const distance = Math.random() * (max - min) + min;
     const angle = Math.random() * Math.PI * 2;
     const moveX = Math.cos(angle) * distance;
@@ -38,36 +47,34 @@ noBtn.addEventListener("mouseover", () => {
 
     noBtn.style.transition = "transform 0.3s ease";
     noBtn.style.transform = `translate(${moveX}px, ${moveY}px)`;
+    
     hoverCount++;
-});
+}
 
-// --- 3. NO BUTTON: CLICK (The Story Logic) ---
+// Add BOTH Listeners (Desktop uses MouseOver, Mobile uses Touch)
+noBtn.addEventListener("mouseover", moveNoButton); // Desktop Hover
+noBtn.addEventListener("touchstart", moveNoButton); // Mobile Tap
+
+// --- 3. CLICK LOGIC (The Angry/Story Part) ---
 noBtn.addEventListener("click", () => {
+    // Only run this if the button has stopped moving (3 times)
     if (hoverCount >= 3) {
-        // Hide buttons so she can't click anything while the reaction plays
         buttons.style.display = "none";
 
-        // --- CHECK WHICH CYCLE WE ARE ON TO SHOW THE REACTION ---
+        // Cycle Logic
         if (cycleCount === 0) {
-            // Reaction 1: RUDE
             title.textContent = "so rude! why?? wrong asnwer!";
             catImg.src = "howrude_peng.gif"; 
-        } 
-        else if (cycleCount === 1) {
-            // Reaction 2: SAD
+        } else if (cycleCount === 1) {
             title.textContent = "again?? WHYY? now im sad";
             catImg.src = "puppy_eye_peng.gif";
-        } 
-        else if (cycleCount === 2) {
-            // Reaction 3: TANTRUM
+        } else if (cycleCount === 2) {
             title.textContent = "your so mean to me GO BACK!";
             catImg.src = "tantrum_peng.gif";
         }
 
-        // Increase the Cycle Count (Level Up)
         cycleCount++;
 
-        // Wait 6 seconds, then RESET the game to the start (or final state)
         setTimeout(() => {
             resetGame();
         }, 6000);
@@ -84,27 +91,22 @@ yesBtn.addEventListener("click", () => {
     finalText.style.display = "block";
 });
 
-// --- 5. RESET FUNCTION (Determines the Next State) ---
+// --- 5. RESET FUNCTION ---
 function resetGame() {
-    // Reset No Button Physics
     hoverCount = 0;
     noBtn.style.transform = "translate(0px, 0px)";
     noBtn.style.cursor = "default";
-    
-    // Bring buttons back
     buttons.style.display = "flex";
 
-    // --- CHECK IF WE REACHED THE FINAL LEVEL ---
     if (cycleCount >= 3) {
-        // FINAL LEVEL: MAD STATE
-        noBtn.style.display = "none"; // Hide No Button forever
+        // FINAL LEVEL
+        noBtn.style.display = "none";
         title.textContent = "NOW IM MAD! AGAIN WILL YOU BE MY VALENTINE?";
-        catImg.src = "angey_pengnobg.gif"; // The Final Mad GIF
-
+        catImg.src = "angey_pengnobg.gif"; 
     } else {
-        // NORMAL LEVELS: RESET TO START
-        noBtn.style.display = "block"; // Show No Button again
+        // NORMAL LEVEL
+        noBtn.style.display = "block"; 
         title.textContent = "Will you be my Valentine?";
-        catImg.src = "penguin_ask.gif"; // Back to original asking GIF
+        catImg.src = "penguin_ask.gif"; 
     }
 }

@@ -6,41 +6,37 @@ body {
     align-items: center;
     background-image: url("heart-bg.jpg");
     font-family: "Pixelify Sans", sans-serif;
+    overflow: hidden; /* Stops scrolling if button moves too far */
 }
 
 /* Envelope Screen */
 #envelope-container {
     text-align: center;
-    cursor:pointer;
+    cursor: pointer;
 }
 
 @keyframes pulse {
-    0% {
-        transform:scale(1);
-    }
-    50% {
-        transform: scale(1.1);
-    }
-    100% {
-        transform: scale(1);
-    }
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
-#envelope{
+#envelope {
     width: 200px;
     animation: pulse 1.5s infinite;
     cursor: pointer;
 }
 
-#letter-container{
+#letter-container {
     display: none;
-    position:fixed;
+    position: fixed;
     inset: 0;
     justify-content: center;
     align-items: center;
+    z-index: 10;
 }
 
-.letter-window{
+.letter-window {
     width: 90vw;
     max-width: 800px;
     aspect-ratio: 3/2;
@@ -70,7 +66,7 @@ body {
 
 h1 {
     font-size: 30px;
-    margin:0;
+    margin: 0;
 }
 
 p {
@@ -78,7 +74,6 @@ p {
 }
 
 /* Cat */
-
 .cat {
     width: 250px;
     margin: 10px 0;
@@ -89,7 +84,7 @@ p {
     width: 180px;
 }
 
-/* buttons */
+/* Buttons */
 .buttons {
     display: flex;
     justify-content: center;
@@ -97,8 +92,8 @@ p {
     position: relative;
 }
 
-.no-wrapper{
-    position:relative;
+.no-wrapper {
+    position: relative;
 }
 
 .btn {
@@ -107,11 +102,10 @@ p {
     user-select: none;
 }
 
-.yes-btn,
-.no-btn {
-width: 120px;
-height: auto;
-display: inline-block;
+.yes-btn, .no-btn {
+    width: 120px;
+    height: auto;
+    display: inline-block;
 }
 
 .yes-btn {
@@ -128,12 +122,50 @@ display: inline-block;
     cursor: default;
 }
 
-.final-text{
+.final-text {
     font-size: 22px;
     line-height: 1.4;
     text-align: center;
     display: inline-block;
     padding: 10px 20px;
-    background-color: rgba(255,240,240,0.5);
+    background-color: rgba(255, 240, 240, 0.9); /* Added opacity to make text readable */
     border-radius: 12px;
+}
+
+/* --- MOBILE RESPONSIVENESS (The New Part) --- */
+@media (max-width: 600px) {
+    
+    .letter-window {
+        width: 95vw;
+        height: auto;
+        min-height: 50vh;
+        aspect-ratio: auto; /* Ignore aspect ratio on phone */
+        background-size: 100% 100%; /* Stretch background to fit */
+        padding-top: 60px;
+        padding-bottom: 30px;
+    }
+
+    h1 {
+        font-size: 20px;
+        padding: 0 10px;
+    }
+
+    .cat {
+        width: 140px; 
+        margin: 10px 0;
+    }
+
+    .buttons {
+        gap: 15px; 
+    }
+
+    .btn, .yes-btn, .no-btn {
+        width: 90px; 
+    }
+
+    /* Make final text readable on small screens */
+    .final-text {
+        font-size: 16px;
+        width: 80%;
+    }
 }
