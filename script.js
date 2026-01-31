@@ -12,6 +12,7 @@ const finalText = document.getElementById("final-text");
 // --- VARIABLES ---
 let hoverCount = 0;
 let cycleCount = 0;
+let lastMoveTime = 0; // NEW: Prevents double-counting glitch on phones
 
 // --- 1. ENVELOPE LOGIC ---
 envelope.addEventListener("click", () => {
@@ -22,22 +23,29 @@ envelope.addEventListener("click", () => {
     }, 50);
 });
 
-// --- 2. MOVEMENT LOGIC (Shared by Mouse & Touch) ---
+// --- 2. MOVEMENT LOGIC (Bulletproof for Mobile) ---
 function moveNoButton(e) {
-    // If we've done this 3 times, STOP moving and allow the click
+    // A. Check if enough time has passed (Fixes the "Double Tap" bug)
+    const now = Date.now();
+    if (now - lastMoveTime < 200) {
+        return; // Ignore if it triggered twice in 0.2 seconds
+    }
+    lastMoveTime = now;
+
+    // B. If we've done this 3 times, STOP moving and allow the click
     if (hoverCount >= 3) {
         noBtn.style.cursor = "pointer";
-        return; // Let the event pass through (so it clicks)
+        return; 
     }
 
-    // IMPORTANT: If this is a touch event (mobile), stop the click from happening!
+    // C. Mobile Touch Fix
     if (e.type === "touchstart") {
-        e.preventDefault(); 
+        e.preventDefault(); // Stop the screen from zooming/clicking
     }
 
-    // SMART LOGIC: Move less on mobile so it stays on screen
+    // D. Move Logic
     const isMobile = window.innerWidth <= 600;
-    const min = isMobile ? 50 : 100; // Smaller moves on phone
+    const min = isMobile ? 50 : 100; 
     const max = isMobile ? 100 : 200;
 
     const distance = Math.random() * (max - min) + min;
@@ -51,13 +59,13 @@ function moveNoButton(e) {
     hoverCount++;
 }
 
-// Add BOTH Listeners (Desktop uses MouseOver, Mobile uses Touch)
-noBtn.addEventListener("mouseover", moveNoButton); // Desktop Hover
-noBtn.addEventListener("touchstart", moveNoButton); // Mobile Tap
+// Add Listeners
+noBtn.addEventListener("mouseover", moveNoButton);
+noBtn.addEventListener("touchstart", moveNoButton);
 
 // --- 3. CLICK LOGIC (The Angry/Story Part) ---
 noBtn.addEventListener("click", () => {
-    // Only run this if the button has stopped moving (3 times)
+    // Only run if the button has officially stopped moving
     if (hoverCount >= 3) {
         buttons.style.display = "none";
 
@@ -94,6 +102,7 @@ yesBtn.addEventListener("click", () => {
 // --- 5. RESET FUNCTION ---
 function resetGame() {
     hoverCount = 0;
+    lastMoveTime = 0; // Reset the timer
     noBtn.style.transform = "translate(0px, 0px)";
     noBtn.style.cursor = "default";
     buttons.style.display = "flex";
